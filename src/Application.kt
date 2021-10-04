@@ -2,18 +2,19 @@ package com.example
 
 import com.example.authentication.JwtService
 import com.example.authentication.hash
-import com.example.data.model.User
 import com.example.repository.DatabaseFactory
 import com.example.repository.Repo
+import com.example.route.UserRoute
 import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import io.ktor.sessions.*
 import io.ktor.auth.*
-import io.ktor.gson.*
 import io.ktor.features.*
+import io.ktor.gson.*
+import io.ktor.http.*
+import io.ktor.locations.*
+import io.ktor.request.*
+import io.ktor.response.*
+import io.ktor.routing.*
+import io.ktor.sessions.*
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -34,6 +35,7 @@ fun Application.module(testing: Boolean = false) {
 
     install(Authentication) {
     }
+    install(Locations)
 
     install(ContentNegotiation) {
         gson {
@@ -44,23 +46,7 @@ fun Application.module(testing: Boolean = false) {
         get("/") {
             call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
         }
-        //get data note berdasarkan id
-        get("/note/{id}") {
-            val id = call.parameters["id"]
-            call.respond("${id}")
-        }
-        get("/token") {
-            val email = call.request.queryParameters["email"]!!
-            val password = call.request.queryParameters["password"]!!
-            val username = call.request.queryParameters["username"]!!
-
-            val user = User(email, hashFunction(password), username)
-            call.respond(jwtService.generateToken(user))
-        }
-        get("/note") {
-            val id = call.request.queryParameters["id"]
-            call.respond("${id}")
-        }
+        UserRoute(db, jwtService, hashFunction)
         route("/notes") {
             route("/create") {
                 //localhost:8080/notes/create

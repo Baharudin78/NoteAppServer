@@ -21,15 +21,17 @@ class Repo {
         UserTable.select {
             UserTable.email.eq(email) }
             .map { rowToUser (it) }
+            .singleOrNull()
     }
-    private fun rowToUser(row : ResultRow?) : User? {
+     private fun rowToUser(row : ResultRow?):User? {
         if (row == null) {
             return null
         }
         return User(
             email = row[UserTable.email],
-            userName = row[UserTable.userName],
-            hashPassword = row[UserTable.hashPassword]
+            hashPassword = row[UserTable.hashPassword],
+            userName = row[UserTable.userName]
+
         )
     }
 }
