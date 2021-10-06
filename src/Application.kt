@@ -4,9 +4,11 @@ import com.example.authentication.JwtService
 import com.example.authentication.hash
 import com.example.repository.DatabaseFactory
 import com.example.repository.Repo
+import com.example.route.NoteRoute
 import com.example.route.UserRoute
 import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.auth.jwt.*
 import io.ktor.features.*
 import io.ktor.gson.*
 import io.ktor.http.*
@@ -34,6 +36,16 @@ fun Application.module(testing: Boolean = false) {
     }
 
     install(Authentication) {
+        jwt ("jwt"){
+            verifier(jwtService.verifier)
+            realm = "Note Server"
+            validate {
+                val payload = it.payload
+                val email = payload.getClaim("email").asString()
+                val user = db.findUserByEmail(email)
+                user
+            }
+        }
     }
     install(Locations)
 
@@ -47,6 +59,7 @@ fun Application.module(testing: Boolean = false) {
             call.respondText("HELLO WORLD!", contentType = ContentType.Text.Plain)
         }
         UserRoute(db, jwtService, hashFunction)
+        NoteRoute(db, hashFunction)
         route("/notes") {
             route("/create") {
                 //localhost:8080/notes/create
