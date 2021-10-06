@@ -21,6 +21,9 @@ sourceSets {
     main.resources.srcDirs = ['resources']
     test.resources.srcDirs = ['testresources']
 }
+tasks.create("stage") {
+    dependsOn("installDist")
+}
 
 repositories {
     mavenLocal()
